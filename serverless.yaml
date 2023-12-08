@@ -1,0 +1,124 @@
+
+service: product-management
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: us-east-1
+
+functions:
+
+  createProduct:
+    handler: main.createProduct
+    events:
+   
+      - http:
+          path: /products
+          method: post
+          authorizer: aws_iam
+
+    role: arn:aws:iam::281604526131:role/product-management-role
+
+
+  getProducts:
+    handler: main.getProducts
+    events:
+
+      - http:
+          path: /products
+          method: get
+          authorizer: aws_iam
+
+    role: arn:aws:iam::281604526131:role/product-management-read-role
+
+
+  updateProduct:
+    handler: main.updateProduct
+    events:
+
+      - http:
+          path: /products/{id}
+          method: patch
+          authorizer: aws_iam
+
+    role: arn:aws:iam::281604526131:role/product-management-write-role
+
+
+  deleteProduct:
+    handler: main.deleteProduct
+    events:
+
+      - http:
+          path: /products/{id}
+          method: delete
+          authorizer: aws_iam
+
+    role: arn:aws:iam::281604526131:role/product-management-write-role
+
+
+functions:
+  uploadToS3:
+    handler: upload.generateUploadURL
+    events:
+
+      - http:
+          path: /upload
+          method: post
+          authorizer: aws_iam
+
+    role: arn:aws:iam::281604526131:role/s3-upload-role
+
+
+functions:
+  downloadFromS3:
+    handler: download.getDownloadURL
+    events:
+
+      - http:
+          path: /download/{fileName}
+          method: get
+          authorizer: aws_iam
+
+    role: arn:aws:iam::281604526131:role/s3-download-role
+
+
+iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - s3:PutObject
+      - s3:GetObject
+    Resource:
+      - arn:aws:s3:::myvigbucket/*
+  - Effect:
+ 
+Allow
+
+    
+Action:
+
+      
+-
+ 
+dynamodb:GetItem
+
+      
+-
+ 
+dynamodb:PutItem
+
+      
+-
+ 
+dynamodb:UpdateItem
+
+      
+-
+ 
+dynamodb:DeleteItem
+
+    
+Resource:
+
+      
+-
+ 
+arn:aws:dynamodb:us-east-1:281604526131:table/product-management
